@@ -75,6 +75,7 @@ public class MoviesStore {
 
     public void deleteAll() {
         catalog.clear();
+        nextId = 1;
     }
 
 
