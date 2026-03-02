@@ -8,12 +8,14 @@ import java.util.*;
 public class MoviesStore {
 
     private final int minYear = 1888;
-
     private final Map<Integer, Movie> catalog;
+
+    private int nextId;
 
     // TODO: connect MoviesStoreJsonAdapter, add read() when first creating store & update() for each movie added/deleted
     public MoviesStore() {
         this.catalog = new HashMap<>();
+        nextId = 1;
     }
 
     public boolean has(Movie movie) {
@@ -79,8 +81,8 @@ public class MoviesStore {
     // HELPER METHODS
 
     private void assignId(Movie movie) {
-        int nextId = catalog.size() + 1;
         movie.setId(nextId);
+        nextId++;
     }
 
 
