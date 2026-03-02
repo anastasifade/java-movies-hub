@@ -16,16 +16,16 @@ public class MoviesServer {
     private int port;
 
     public MoviesServer(int port, MoviesLogger log) throws IOException {
+        this.log = log;
         this.port = port;
         this.server = HttpServer.create(new InetSocketAddress(port), 0);
-        this.log = log;
     }
 
 
     // Вспомогательные методы для создания и настройки сервера
 
     public void createContext(String context, BaseHttpHandler handler) {
-        log.logInfo(String.format("Добавлен контекст [%s].", context));
+        log.info(String.format("Добавлен контекст [%s]", context));
         server.createContext(context, handler);
     }
 
@@ -34,12 +34,12 @@ public class MoviesServer {
 
     public void start() {
         server.start();
-        log.logInfo(String.format("Сервер запущен на %d порту.", port));
+        log.info(String.format("Сервер запущен на %d порту", port));
     }
 
     public void stop() {
         server.stop(0);
-        log.logInfo("Сервер остановлен.");
+        log.info("Сервер остановлен");
     }
 
 }

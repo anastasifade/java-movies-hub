@@ -9,6 +9,7 @@ import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.ListOfMoviesTypeToken;
 import ru.practicum.moviehub.store.MoviesStore;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -38,14 +39,13 @@ public class MoviesApiTest {
     private static Movie upcomingMovie;
 
     @BeforeAll
-    static void beforeAll() throws IOException {
+    static void beforeAll() throws IOException, FileNotFoundException {
         store = new MoviesStore();
 
-        MoviesLogger mockLog = new MoviesLogger("test_log.txt");
+        MoviesLogger log = new MoviesLogger("test_log.txt", "test_error_log.txt");
 
-        server = new MoviesServer(PORT, mockLog);
-        server.createContext("/movies", new MoviesHandler(new MoviesGateway(store),
-                mockLog));
+        server = new MoviesServer(PORT, log);
+        server.createContext("/movies", new MoviesHandler(new MoviesGateway(store), log));
         server.start();
         gson = new Gson();
 
@@ -94,7 +94,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMovies_returns_200() throws IOException, InterruptedException {
+    void getMovies_returns_200() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .GET()
@@ -111,7 +111,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMovies_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException {
+    void getMovies_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .GET()
@@ -218,7 +218,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesByYear_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException {
+    void getMoviesByYear_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "?year=2026"))
                 .GET()
@@ -296,7 +296,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesById_whenMovieNotFound_returns_404() throws IOException, InterruptedException {
+    void getMoviesById_whenMovieNotFound_returns_404() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/99999999"))
                 .GET()

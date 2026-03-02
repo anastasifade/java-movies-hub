@@ -28,7 +28,7 @@ public class MovieHubApp {
                 MovieHubApp app = new MovieHubApp();
                 app.start();
             } catch (IOException e) {
-                log.logError(e, "Необработанная ошибка. Работа сервера завершена.");
+                log.error(e, "Критическая ошибка работы сервера. Работа сервера невозможна");
             }
         } catch (FileNotFoundException e) {
             System.out.println("Непредвиденная ошибка при запуске программы.");
@@ -37,12 +37,8 @@ public class MovieHubApp {
     }
 
     private void start() {
-        try {
-            addContexts();
-            server.start();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        addContexts();
+        server.start();
     }
 
     private void addContexts() {
