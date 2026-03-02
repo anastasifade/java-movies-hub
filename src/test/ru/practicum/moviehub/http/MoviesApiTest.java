@@ -91,7 +91,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMovies_returns_200() throws IOException, InterruptedException  {
+    void getMovies_returns_200() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .GET()
@@ -108,7 +108,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMovies_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException  {
+    void getMovies_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .GET()
@@ -215,7 +215,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesByYear_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException  {
+    void getMoviesByYear_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "?year=2026"))
                 .GET()
@@ -293,7 +293,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesById_whenMovieNotFound_returns_404() throws IOException, InterruptedException  {
+    void getMoviesById_whenMovieNotFound_returns_404() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/99999999"))
                 .GET()

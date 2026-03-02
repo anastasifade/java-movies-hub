@@ -10,7 +10,8 @@ public class ApiResponse<T> {
     private T body;
     private FailureState failureState;
 
-    public ApiResponse() {}
+    public ApiResponse() {
+    }
 
     public ApiResponse(boolean isSuccess) {
         this.isSuccess = isSuccess;

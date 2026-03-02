@@ -105,7 +105,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
                 return 500;
             }
             default -> {
-                return 418; //TODO maybe delete lol
+                return 418;
             }
         }
     }
@@ -126,8 +126,10 @@ public abstract class BaseHttpHandler implements HttpHandler {
         return gson.toJson(body);
     }
 
-    /** Метод возвращает String вне зависимости от исходного типа данных.
-     * Валидация переданных данных осуществляется на уровне Gateway в рамках формирования ответа на запрос. */
+    /**
+     * Метод возвращает String вне зависимости от исходного типа данных.
+     * Валидация переданных данных осуществляется на уровне Gateway в рамках формирования ответа на запрос.
+     */
     String parseFromJson(String json, String itemToParse) {
         try {
             JsonElement element = JsonParser.parseString(json);
