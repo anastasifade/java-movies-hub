@@ -25,10 +25,10 @@ public class MoviesGateway implements Gateway {
     }
 
     public ApiResponse<?> getByYear(int year) {
-        if (year < store.MIN_YEAR || year > store.MAX_YEAR) {
+        if (year < store.getMinYear() || year > store.getMaxYear()) {
             return new ApiResponse<>(false, FailureState.INVALID_REQUEST,
                     String.format("Поиск по году выхода возможен в интервале [%d-%d].",
-                            store.MIN_YEAR, store.MAX_YEAR));
+                            store.getMinYear(), store.getMaxYear()));
         }
         return new ApiResponse<>(true, store.getMoviesByYear(year));
     }
@@ -83,13 +83,13 @@ public class MoviesGateway implements Gateway {
         } else {
             try {
                 int yearAsInt = Integer.parseInt(year);
-                if (yearAsInt < store.MIN_YEAR || yearAsInt > store.MAX_YEAR) {
+                if (yearAsInt < store.getMinYear() || yearAsInt > store.getMaxYear()) {
                     errors.add(String.format("Поле [year] выходит за границы поиска. " +
-                            "Ожидается численное значение в диапазоне [%d-%d].", store.MIN_YEAR, store.MAX_YEAR));
+                            "Ожидается численное значение в диапазоне [%d-%d].", store.getMinYear(), store.getMaxYear()));
                 }
             } catch (NumberFormatException e) {
                 errors.add(String.format("Поле [year] содержит нелегальные символы. " +
-                        "Ожидается численное значение в диапазоне [%d-%d].", store.MIN_YEAR, store.MAX_YEAR));
+                        "Ожидается численное значение в диапазоне [%d-%d].", store.getMinYear(), store.getMaxYear()));
             }
         }
 

@@ -7,16 +7,20 @@ import java.util.*;
 
 public class MoviesStore {
 
-    public final int MIN_YEAR = 1888;
-    public final int MAX_YEAR;
+    private final int minYear = 1888;
 
     private final Map<Integer, Movie> catalog;
 
     // TODO: connect MoviesStoreJsonAdapter, add read() when first creating store & update() for each movie added/deleted
     public MoviesStore() {
         this.catalog = new HashMap<>();
-        MAX_YEAR = LocalDate.now().getYear() + 1;
     }
+
+    public boolean has(Movie movie) {
+        return catalog.values().stream().anyMatch(item -> item.equals(movie));
+    }
+
+    // GET
 
     public List<Movie> getMovies() {
         return List.copyOf(catalog.values());
@@ -40,15 +44,23 @@ public class MoviesStore {
                 .findFirst();
     }
 
-    public boolean has(Movie movie) {
-        return catalog.values().stream().anyMatch(item -> item.equals(movie));
+    public int getMinYear() {
+        return minYear;
     }
+
+    public int getMaxYear() {
+        return LocalDate.now().getYear() + 1;
+    }
+
+    // ADD
 
     public Movie addMovie(Movie movie) {
         assignId(movie);
         catalog.put(movie.getId(), movie);
         return movie;
     }
+
+    // DELETE
 
     public boolean delete(int id) {
         if (catalog.containsKey(id)) {
@@ -62,6 +74,9 @@ public class MoviesStore {
     public void deleteAll() {
         catalog.clear();
     }
+
+
+    // HELPER METHODS
 
     private void assignId(Movie movie) {
         int nextId = catalog.size() + 1;
