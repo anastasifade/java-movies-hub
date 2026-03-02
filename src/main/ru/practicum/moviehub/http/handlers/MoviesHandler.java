@@ -2,6 +2,7 @@ package ru.practicum.moviehub.http.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import ru.practicum.moviehub.api.gateways.MoviesGateway;
+import ru.practicum.moviehub.logging.MoviesLogger;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,15 +13,19 @@ import java.util.Map;
 public class MoviesHandler extends BaseHttpHandler {
 
     private final MoviesGateway gateway;
+    private final MoviesLogger log;
 
-    public MoviesHandler(MoviesGateway gateway) {
+    public MoviesHandler(MoviesGateway gateway, MoviesLogger log) {
         this.gateway = gateway;
+        this.log = log;
     }
 
 
     // GET
 
     void handleGet(HttpExchange exchange) throws IOException {
+        log.logInfo("Принят GET запрос: " + exchange.getRequestURI());
+
         String path = exchange.getRequestURI().getPath();
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> headers = Map.of("Content-Type", C_TYPE_JSON);
@@ -40,6 +45,7 @@ public class MoviesHandler extends BaseHttpHandler {
             return;
         }
 
+        log.logInfo("Невозможно обработать запрос: " + exchange.getRequestURI());
         send(exchange, 400, headers, "Неподдерживаемый запрос.");
     }
 
@@ -57,6 +63,7 @@ public class MoviesHandler extends BaseHttpHandler {
                 throw new IllegalArgumentException();
             }
         } catch (IndexOutOfBoundsException | IllegalArgumentException e) {
+            log.logWarn(e, "Ошибка при обработке запроса: " + exchange.getRequestURI());
             send(exchange, 400, headers, "Неподдерживаемый формат параметра запроса. " +
                     "Ожидиается запрос формата [year=XXXX], где XXXX - число от 1888 до " + LocalDate.now().getYear());
         }
@@ -67,6 +74,7 @@ public class MoviesHandler extends BaseHttpHandler {
             int id = Integer.parseInt(idAsStr);
             processResponse(exchange, gateway.getById(id), 200, headers);
         } catch (NumberFormatException e) {
+            log.logWarn(e, "Ошибка при обработке запроса: " + exchange.getRequestURI());
             send(exchange, 400, headers, "Неподдерживаемый формат запроса. " +
                     "При поиске фильма по уникальному идентификатору ожидается запрос формата [/movies/XXXX], " +
                     "где XXXX - целое положительное число.");
@@ -77,8 +85,12 @@ public class MoviesHandler extends BaseHttpHandler {
     // POST
 
     void handlePost(HttpExchange exchange) throws IOException {
+        log.logInfo(String.format("Принят POST запрос.\n URI: %s.\nТело запроса: %s.",
+                exchange.getRequestURI(), new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET)));
 
         if (!exchange.getRequestHeaders().get("Content-Type").contains(C_TYPE_JSON)) {
+            log.logInfo(String.format("Неподдержвиаемые заголовки запроса.\nЗапрос: %s.\nЗаголовки: %s.",
+                    exchange.getRequestURI(), exchange.getRequestHeaders()));
             send(exchange, 415, Map.of("Content-Length", "0"));
         }
 
@@ -103,8 +115,10 @@ public class MoviesHandler extends BaseHttpHandler {
             processResponse(exchange, gateway.post(params), 201, headers);
 
         } catch (IllegalArgumentException e) {
+            log.logWarn(e, "Ошибка при обработке запроса: " + exchange.getRequestURI());
             send(exchange, 400, headers, e.getMessage());
         } catch (InvalidPropertiesFormatException e) {
+            log.logWarn(e, "Ошибка при обработке запроса: " + exchange.getRequestURI());
             send(exchange, 422, headers, e.getMessage());
         }
     }
@@ -113,6 +127,8 @@ public class MoviesHandler extends BaseHttpHandler {
     // DELETE
 
     void handleDelete(HttpExchange exchange) throws IOException {
+        log.logInfo("Принят DELETE запрос: " + exchange.getRequestURI());
+
         String path = exchange.getRequestURI().getPath();
         String query = exchange.getRequestURI().getQuery();
         Map<String, String> headers = Map.of("Content-Length", "0");
@@ -128,6 +144,7 @@ public class MoviesHandler extends BaseHttpHandler {
             return;
         }
 
+        log.logInfo("Невозможно обработать запрос: " + exchange.getRequestURI());
         send(exchange, 400, headers, "Неподдерживаемый запрос.");
     }
 
@@ -140,6 +157,7 @@ public class MoviesHandler extends BaseHttpHandler {
             int id = Integer.parseInt(idAsStr);
             processResponse(exchange, gateway.deleteById(id), 204, headers);
         } catch (NumberFormatException e) {
+            log.logWarn(e, "Ошибка при обработке запроса: " + exchange.getRequestURI());
             send(exchange, 400, headers, "Неподдерживаемый формат запроса. " +
                     "При удалении фильма по уникальному идентификатору ожидается запрос формата [/movies/XXXX], " +
                     "где XXXX - целое положительное число.");

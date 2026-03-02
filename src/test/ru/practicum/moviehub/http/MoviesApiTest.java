@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
 import ru.practicum.moviehub.api.gateways.MoviesGateway;
 import ru.practicum.moviehub.http.handlers.MoviesHandler;
+import ru.practicum.moviehub.logging.MoviesLogger;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.ListOfMoviesTypeToken;
 import ru.practicum.moviehub.store.MoviesStore;
@@ -41,8 +42,11 @@ public class MoviesApiTest {
     static void beforeAll() throws IOException {
         store = new MoviesStore();
 
-        server = new MoviesServer(PORT);
-        server.createContext("/movies", new MoviesHandler(new MoviesGateway(store)));
+        MoviesLogger mockLog = new MoviesLogger("test_log.txt");
+
+        server = new MoviesServer(PORT, mockLog);
+        server.createContext("/movies", new MoviesHandler(new MoviesGateway(store),
+                mockLog));
         server.start();
         gson = new Gson();
 
