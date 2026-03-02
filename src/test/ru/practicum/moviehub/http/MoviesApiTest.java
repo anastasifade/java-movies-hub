@@ -1,7 +1,6 @@
 package ru.practicum.moviehub.http;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.*;
 import ru.practicum.moviehub.api.gateways.MoviesGateway;
 import ru.practicum.moviehub.http.handlers.MoviesHandler;
