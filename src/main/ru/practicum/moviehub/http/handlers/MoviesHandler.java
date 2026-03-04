@@ -94,8 +94,9 @@ public class MoviesHandler extends BaseHttpHandler {
         log.info("Принят запрос [POST]: " + exchange.getRequestURI());
 
         if (!exchange.getRequestHeaders().get("Content-Type").contains(C_TYPE_JSON)) {
-            log.warn(String.format("Ошибка при обработке запроса [POST]: [%s] - неподдерживаемые заголовки запроса.\n " +
-                    "Заголовки: [%s]", exchange.getRequestURI(), exchange.getRequestHeaders().entrySet()));
+            log.warn(String.format("Ошибка при обработке запроса [POST]: [%s] - неподдерживаемые заголовки запроса.%s" +
+                    "Заголовки: [%s]", exchange.getRequestURI(), System.lineSeparator(),
+                    exchange.getRequestHeaders().entrySet()));
             send(exchange, StatusCodes.UNSUPPORTED_MEDIA_TYPE, Map.of("Content-Length", "0"));
         }
 

@@ -26,22 +26,23 @@ public class MoviesLogger {
     public void error(Exception e, String message) {
         LocalDateTime timestamp = LocalDateTime.now();
 
-        logger.printf("[%s] [ERROR]: %s. See error log for stack trace.\n", timestamp.format(dtf), message);
+        logger.printf("[%s] [ERROR]: %s. See error log for stack trace.%s",
+                timestamp.format(dtf), message, System.lineSeparator());
         logger.flush();
 
-        errorLogger.printf("[%s]:\n", timestamp.format(dtf));
+        errorLogger.printf("[%s]:%s", timestamp.format(dtf), System.lineSeparator());
         e.printStackTrace(errorLogger);
         errorLogger.println();
         errorLogger.flush();
     }
 
     public void warn(String message) {
-        logger.printf("[%s] [WARN]: %s.\n", LocalDateTime.now().format(dtf), message);
+        logger.printf("[%s] [WARN]: %s.%s", LocalDateTime.now().format(dtf), message, System.lineSeparator());
         logger.flush();
     }
 
     public void info(String message) {
-        logger.printf("[%s] [INFO]: %s.\n", LocalDateTime.now().format(dtf), message);
+        logger.printf("[%s] [INFO]: %s.%s", LocalDateTime.now().format(dtf), message, System.lineSeparator());
         logger.flush();
     }
 }
