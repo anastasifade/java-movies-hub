@@ -2,6 +2,7 @@ package ru.practicum.moviehub.http.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import ru.practicum.moviehub.api.gateways.MoviesGateway;
+import ru.practicum.moviehub.http.util.StatusCodes;
 import ru.practicum.moviehub.logging.MoviesLogger;
 
 import java.io.IOException;
@@ -47,11 +48,11 @@ public class MoviesHandler extends BaseHttpHandler {
 
         log.warn(String.format("Запрос [GET]: [%s] не обработан - неподдерживаемый формат запроса",
                 exchange.getRequestURI()));
-        send(exchange, 400, headers, "Неподдерживаемый запрос.");
+        send(exchange, StatusCodes.BAD_REQUEST, headers, "Неподдерживаемый запрос.");
     }
 
     private void handleGetAll(HttpExchange exchange, Map<String, String> headers) throws IOException {
-        processResponse(exchange, gateway.getAll(), 200, headers);
+        processResponse(exchange, gateway.getAll(), StatusCodes.OK, headers);
     }
 
     private void handleGetByQuery(HttpExchange exchange, Map<String, String> headers, String query) throws IOException {
@@ -59,7 +60,7 @@ public class MoviesHandler extends BaseHttpHandler {
             Map<String, String> params = queryToMap(query);
             if (params.containsKey("year") && params.size() == 1) {
                 int year = Integer.parseInt(params.get("year"));
-                processResponse(exchange, gateway.getByYear(year), 200, headers);
+                processResponse(exchange, gateway.getByYear(year), StatusCodes.OK, headers);
             } else {
                 throw new IllegalArgumentException();
             }
@@ -67,7 +68,7 @@ public class MoviesHandler extends BaseHttpHandler {
             log.warn(String.format("Ошибка при обработке запроса [GET]: [%s] - неподдерживаемый формат параметра запроса",
                     exchange.getRequestURI()));
 
-            send(exchange, 400, headers, "Неподдерживаемый формат параметра запроса. " +
+            send(exchange, StatusCodes.BAD_REQUEST, headers, "Неподдерживаемый формат параметра запроса. " +
                     "Ожидиается запрос формата [year=XXXX], где XXXX - число от 1888 до " + LocalDate.now().getYear());
         }
     }
@@ -75,12 +76,12 @@ public class MoviesHandler extends BaseHttpHandler {
     private void handleGetById(HttpExchange exchange, Map<String, String> headers, String idAsStr) throws IOException {
         try {
             int id = Integer.parseInt(idAsStr);
-            processResponse(exchange, gateway.getById(id), 200, headers);
+            processResponse(exchange, gateway.getById(id), StatusCodes.OK, headers);
         } catch (NumberFormatException e) {
             log.warn(String.format("Ошибка при обработке запроса [GET]: [%s] - " +
                             "неподдерживаемый формат уникального идентификатора", exchange.getRequestURI()));
 
-            send(exchange, 400, headers, "Неподдерживаемый формат запроса. " +
+            send(exchange, StatusCodes.BAD_REQUEST, headers, "Неподдерживаемый формат запроса. " +
                     "При поиске фильма по уникальному идентификатору ожидается запрос формата [/movies/XXXX], " +
                     "где XXXX - целое положительное число.");
         }
@@ -95,7 +96,7 @@ public class MoviesHandler extends BaseHttpHandler {
         if (!exchange.getRequestHeaders().get("Content-Type").contains(C_TYPE_JSON)) {
             log.warn(String.format("Ошибка при обработке запроса [POST]: [%s] - неподдерживаемые заголовки запроса.\n " +
                     "Заголовки: [%s]", exchange.getRequestURI(), exchange.getRequestHeaders().entrySet()));
-            send(exchange, 415, Map.of("Content-Length", "0"));
+            send(exchange, StatusCodes.UNSUPPORTED_MEDIA_TYPE, Map.of("Content-Length", "0"));
         }
 
         String path = exchange.getRequestURI().getPath();
@@ -116,16 +117,16 @@ public class MoviesHandler extends BaseHttpHandler {
             String title = parseFromJson(jsonRequest, "title");
             String year = parseFromJson(jsonRequest, "year");
             Map<String, String> params = Map.of("title", title, "year", year);
-            processResponse(exchange, gateway.post(params), 201, headers);
+            processResponse(exchange, gateway.post(params), StatusCodes.CREATED, headers);
 
         } catch (IllegalArgumentException e) {
             log.warn(String.format("Ошибка при обработке запроса [POST]: [%s] - %s",
                     exchange.getRequestURI(), e.getMessage().toLowerCase()));
-            send(exchange, 400, headers, e.getMessage());
+            send(exchange, StatusCodes.BAD_REQUEST, headers, e.getMessage());
         } catch (InvalidPropertiesFormatException e) {
             log.warn(String.format("Ошибка при обработке запроса [POST]: [%s] - %s",
                     exchange.getRequestURI(), e.getMessage().toLowerCase()));
-            send(exchange, 422, headers, e.getMessage());
+            send(exchange, StatusCodes.UNPROCESSABLE_CONTENT, headers, e.getMessage());
         }
     }
 
@@ -152,22 +153,22 @@ public class MoviesHandler extends BaseHttpHandler {
 
         log.warn(String.format("Запрос [DELETE]: [%s] не обработан - неподдерживаемый формат запроса",
                 exchange.getRequestURI()));
-        send(exchange, 400, headers, "Неподдерживаемый запрос.");
+        send(exchange, StatusCodes.BAD_REQUEST, headers, "Неподдерживаемый запрос.");
     }
 
     private void handleDeleteAll(HttpExchange exchange, Map<String, String> headers) throws IOException {
-        processResponse(exchange, gateway.deleteAll(), 204, headers);
+        processResponse(exchange, gateway.deleteAll(), StatusCodes.NO_CONTENT, headers);
     }
 
     private void handleDeleteById(HttpExchange exchange, Map<String, String> headers, String idAsStr) throws IOException {
         try {
             int id = Integer.parseInt(idAsStr);
-            processResponse(exchange, gateway.deleteById(id), 204, headers);
+            processResponse(exchange, gateway.deleteById(id), StatusCodes.NO_CONTENT, headers);
         } catch (NumberFormatException e) {
             log.warn(String.format("Ошибка при обработке запроса [DELETE]: [%s] - " +
                     "неподдерживаемый формат уникального идентификатора", exchange.getRequestURI()));
 
-            send(exchange, 400, headers, "Неподдерживаемый формат запроса. " +
+            send(exchange, StatusCodes.BAD_REQUEST, headers, "Неподдерживаемый формат запроса. " +
                     "При удалении фильма по уникальному идентификатору ожидается запрос формата [/movies/XXXX], " +
                     "где XXXX - целое положительное число.");
         }

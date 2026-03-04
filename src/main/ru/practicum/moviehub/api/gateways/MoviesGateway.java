@@ -13,6 +13,8 @@ import java.util.Optional;
 
 public class MoviesGateway implements Gateway {
 
+    private static final int MAX_TITLE_LENGTH = 100;
+
     private final MoviesStore store;
 
     public MoviesGateway(final MoviesStore store) {
@@ -74,7 +76,7 @@ public class MoviesGateway implements Gateway {
 
         if (title == null || title.isEmpty()) {
             errors.add("Поле [title] не может быть пустым.");
-        } else if (title.length() > 100) {
+        } else if (title.length() > MAX_TITLE_LENGTH) {
             errors.add("Поле [title] не должно быть длинее 100 символов.");
         }
 

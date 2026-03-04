@@ -8,7 +8,8 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.practicum.moviehub.api.response.ApiResponse;
 import ru.practicum.moviehub.api.enums.FailureState;
-import ru.practicum.moviehub.http.enums.Method;
+import ru.practicum.moviehub.http.util.Method;
+import ru.practicum.moviehub.http.util.StatusCodes;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -30,10 +31,10 @@ public abstract class BaseHttpHandler implements HttpHandler {
                 case GET -> handleGet(exchange);
                 case POST -> handlePost(exchange);
                 case DELETE -> handleDelete(exchange);
-                case UNKNOWN -> send(exchange, 405, Map.of("Content-Length", "0"));
+                case UNKNOWN -> send(exchange, StatusCodes.METHOD_NOT_ALLOWED, Map.of("Content-Length", "0"));
             }
         } catch (IOException e) {
-            send(exchange, 503, Map.of("Content-Length", "0"));
+            send(exchange, StatusCodes.SERVICE_UNAVAILABLE, Map.of("Content-Length", "0"));
         }
     }
 
@@ -90,22 +91,22 @@ public abstract class BaseHttpHandler implements HttpHandler {
     int getErrorCode(FailureState state) {
         switch (state) {
             case INVALID_REQUEST -> {
-                return 400;
+                return StatusCodes.BAD_REQUEST;
             }
             case ITEM_NOT_FOUND -> {
-                return 404;
+                return StatusCodes.NOT_FOUND;
             }
             case INVALID_BODY -> {
-                return 422;
+                return StatusCodes.UNPROCESSABLE_CONTENT;
             }
             case ITEM_ALREADY_EXISTS -> {
-                return 409;
+                return StatusCodes.CONFLICT;
             }
             case UNKNOWN -> {
-                return 500;
+                return StatusCodes.INTERNAL_SERVER_ERROR;
             }
             default -> {
-                return 418;
+                return StatusCodes.IM_A_TEAPOT;
             }
         }
     }

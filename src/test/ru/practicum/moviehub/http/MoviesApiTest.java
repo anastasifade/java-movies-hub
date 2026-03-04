@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import org.junit.jupiter.api.*;
 import ru.practicum.moviehub.api.gateways.MoviesGateway;
 import ru.practicum.moviehub.http.handlers.MoviesHandler;
+import ru.practicum.moviehub.http.util.StatusCodes;
 import ru.practicum.moviehub.logging.MoviesLogger;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.ListOfMoviesTypeToken;
@@ -67,7 +68,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void unsupportedMethod_returns_405() throws IOException, InterruptedException {
+    void unsupportedMethod_returns_MethodNotAllowed() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .PUT(HttpRequest.BodyPublishers.noBody())
@@ -75,7 +76,7 @@ public class MoviesApiTest {
 
         // Проверка на пустом хранилище
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(405, response.statusCode());
+        Assertions.assertEquals(StatusCodes.METHOD_NOT_ALLOWED, response.statusCode());
     }
 
 
@@ -94,7 +95,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMovies_returns_200() throws IOException, InterruptedException  {
+    void getMovies_returns_OK() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .GET()
@@ -102,12 +103,12 @@ public class MoviesApiTest {
 
         // Проверка на пустом хранилище
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
 
         // Проверка после добавления фильмов
         store.addMovie(godfather);
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
     }
 
     @Test
@@ -169,7 +170,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesByYear_onSuccessReturns_200() throws IOException, InterruptedException {
+    void getMoviesByYear_onSuccessReturns_OK() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "?year=" + godfather.getYear()))
                 .GET()
@@ -177,16 +178,16 @@ public class MoviesApiTest {
 
         // Проверка на пустом хранилище
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
 
         // Проверка после добавления фильмов
         store.addMovie(godfather);
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
     }
 
     @Test
-    void getMoviesByYear_onInvalidQuery_returns_400() throws IOException, InterruptedException {
+    void getMoviesByYear_onInvalidQuery_returns_BadRequest() throws IOException, InterruptedException {
         // Проверка запроса с нечисленным значением year
         HttpRequest requestMalformedUri = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "?year=YYYY"))
@@ -202,19 +203,19 @@ public class MoviesApiTest {
 
         // Проверка на пустом хранилище
         HttpResponse<String> response = client.send(requestMalformedUri, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
 
         response = client.send(requestInvalidYear, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
 
         // Проверка после добавления фильмов
         store.addMovie(godfather);
 
         response = client.send(requestMalformedUri, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
 
         response = client.send(requestInvalidYear, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
     }
 
     @Test
@@ -225,7 +226,7 @@ public class MoviesApiTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
         Assertions.assertEquals("[]", response.body());
     }
 
@@ -258,7 +259,7 @@ public class MoviesApiTest {
     @Test
     void getMoviesById_onSuccess_headersContainFormatAndCharset() throws IOException, InterruptedException {
         store.addMovie(godfather);
-        Movie godfatherWithId = store.getMovieById(1).get();
+        Movie godfatherWithId = store.getMovieById(godfather.getId()).get();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/" + godfatherWithId.getId()))
@@ -271,9 +272,9 @@ public class MoviesApiTest {
     }
 
     @Test
-    void getMoviesById_onSuccessReturns_200() throws IOException, InterruptedException {
+    void getMoviesById_onSuccessReturns_OK() throws IOException, InterruptedException {
         store.addMovie(godfather);
-        Movie godfatherWithId = store.getMovieById(1).get();
+        Movie godfatherWithId = store.getMovieById(godfather.getId()).get();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/" + godfatherWithId.getId()))
@@ -281,35 +282,35 @@ public class MoviesApiTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(200, response.statusCode());
+        Assertions.assertEquals(StatusCodes.OK, response.statusCode());
     }
 
     @Test
-    void getMovieById_whenIllegalId_returns_400() throws IOException, InterruptedException {
+    void getMovieById_whenIllegalId_returns_BadRequest() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/abcd"))
                 .GET()
                 .build();
 
         HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
     }
 
     @Test
-    void getMoviesById_whenMovieNotFound_returns_404() throws IOException, InterruptedException  {
+    void getMoviesById_whenMovieNotFound_returns_NotFound() throws IOException, InterruptedException  {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/99999999"))
                 .GET()
                 .build();
 
         HttpResponse response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(404, response.statusCode());
+        Assertions.assertEquals(StatusCodes.NOT_FOUND, response.statusCode());
     }
 
     @Test
     void getMoviesById_returnsMovieWithCorrectId() throws IOException, InterruptedException {
         store.addMovie(godfather);
-        Movie godfatherWithId = store.getMovieById(1).get();
+        Movie godfatherWithId = store.getMovieById(godfather.getId()).get();
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/" + godfatherWithId.getId()))
@@ -343,7 +344,7 @@ public class MoviesApiTest {
     }
 
     @Test
-    void postMovie_onSuccessReturns_201() throws IOException, InterruptedException {
+    void postMovie_onSuccessReturns_Created() throws IOException, InterruptedException {
         String movieJson = gson.toJson(godfather);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -353,11 +354,11 @@ public class MoviesApiTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(201, response.statusCode());
+        Assertions.assertEquals(StatusCodes.CREATED, response.statusCode());
     }
 
     @Test
-    void postMovie_ifMovieAlreadyExists_returns_409() throws IOException, InterruptedException {
+    void postMovie_ifMovieAlreadyExists_returns_Conflict() throws IOException, InterruptedException {
         String movieJson = gson.toJson(godfather);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -369,11 +370,11 @@ public class MoviesApiTest {
         client.send(request, HttpResponse.BodyHandlers.ofString(DEFAULT_CHARSET));
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(409, response.statusCode());
+        Assertions.assertEquals(StatusCodes.CONFLICT, response.statusCode());
     }
 
     @Test
-    void postMovie_forInvalidRequestBody_returns_422() throws IOException, InterruptedException {
+    void postMovie_forInvalidRequestBody_returns_UnprocessableContent() throws IOException, InterruptedException {
         String emptyTitle = "{\"title\": \"\",\"year\": \"2021\"}";
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
@@ -381,7 +382,7 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(emptyTitle, DEFAULT_CHARSET))
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
 
         String titleTooLong = "{\"title\": \"" + "a".repeat(101) + "\",\"year\": \"2021\"}";
         request = HttpRequest.newBuilder()
@@ -390,7 +391,7 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(titleTooLong, DEFAULT_CHARSET))
                 .build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
 
         String emptyYear = "{\"title\": \"title\",\"year\": \"\"}";
         request = HttpRequest.newBuilder()
@@ -399,7 +400,7 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(emptyYear, DEFAULT_CHARSET))
                 .build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
 
         String illegalYear = "{\"title\": \"title\",\"year\": \"YYYY\"}";
         request = HttpRequest.newBuilder()
@@ -408,7 +409,7 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(illegalYear, DEFAULT_CHARSET))
                 .build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
 
         String yearOutOfBounds = "{\"title\": \"title\",\"year\": \"33\"}";
         request = HttpRequest.newBuilder()
@@ -417,7 +418,7 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(yearOutOfBounds, DEFAULT_CHARSET))
                 .build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
 
         String malformedJson = "{this isn't even a real json object}";
         request = HttpRequest.newBuilder()
@@ -426,11 +427,11 @@ public class MoviesApiTest {
                 .POST(HttpRequest.BodyPublishers.ofString(malformedJson, DEFAULT_CHARSET))
                 .build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(422, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNPROCESSABLE_CONTENT, response.statusCode());
     }
 
     @Test
-    void postMovie_forInvalidHeader_returns_415() throws IOException, InterruptedException {
+    void postMovie_forInvalidHeader_returns_UnsupportedMediaType() throws IOException, InterruptedException {
         String movieJson = gson.toJson(godfather);
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -440,7 +441,7 @@ public class MoviesApiTest {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(415, response.statusCode());
+        Assertions.assertEquals(StatusCodes.UNSUPPORTED_MEDIA_TYPE, response.statusCode());
     }
 
     @Test
@@ -464,7 +465,7 @@ public class MoviesApiTest {
     // DELETE /movies
 
     @Test
-    void deleteMovies_returns_204() throws IOException, InterruptedException {
+    void deleteMovies_returns_NoContent() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES))
                 .DELETE()
@@ -472,12 +473,12 @@ public class MoviesApiTest {
 
         // проверка на пустом списке
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(204, response.statusCode());
+        Assertions.assertEquals(StatusCodes.NO_CONTENT, response.statusCode());
 
         // проверка после добавления фильмов
         store.addMovie(godfather);
         response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(204, response.statusCode());
+        Assertions.assertEquals(StatusCodes.NO_CONTENT, response.statusCode());
     }
 
     @Test
@@ -500,39 +501,38 @@ public class MoviesApiTest {
     // DELETE /movies/{id}
 
     @Test
-    void deleteMovieById_onSuccessReturns_204() throws IOException, InterruptedException {
+    void deleteMovieById_onSuccessReturns_NoContent() throws IOException, InterruptedException {
         store.addMovie(godfather);
-        int id = godfather.getId();
 
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL_MOVIES + "/" + id))
+                .uri(URI.create(URL_MOVIES + "/" + godfather.getId()))
                 .DELETE()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(204, response.statusCode());
+        Assertions.assertEquals(StatusCodes.NO_CONTENT, response.statusCode());
     }
 
     @Test
-    void deleteMovieById_forMalformedId_returns_400() throws IOException, InterruptedException {
+    void deleteMovieById_forMalformedId_returns_BadRequest() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/abc"))
                 .DELETE()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(400, response.statusCode());
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.statusCode());
     }
 
     @Test
-    void deleteMovieById_ifMovieNotFound_returns_404() throws IOException, InterruptedException {
+    void deleteMovieById_ifMovieNotFound_returns_NotFound() throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_MOVIES + "/999999"))
                 .DELETE()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        Assertions.assertEquals(404, response.statusCode());
+        Assertions.assertEquals(StatusCodes.NOT_FOUND, response.statusCode());
     }
 
     @Test
